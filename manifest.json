@@ -1,16 +1,25 @@
 {
   "manifest_version": 3,
-  "name": "PostCraft AI — LinkedIn Post Generator & Writer",
-  "short_name": "PostCraft AI",
-  "description": "AI LinkedIn post generator: create viral posts in seconds. Free Chrome extension with 6 styles, hooks & hashtags.",
+  "name": "Quillnova \u2014 LinkedIn Post Generator & AI Writer",
+  "short_name": "Quillnova",
+  "description": "AI LinkedIn post generator: create viral posts in seconds. Free Chrome extension with 6 writing styles, hooks & hashtags.",
   "version": "1.0.0",
   "icons": {
     "16": "icons/icon-16.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "permissions": ["activeTab", "sidePanel", "storage", "tabs", "declarativeNetRequest"],
-  "host_permissions": ["https://sai.sharedllm.com/*", "https://www.linkedin.com/*"],
+  "permissions": [
+    "activeTab",
+    "sidePanel",
+    "storage",
+    "tabs",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://sai.sharedllm.com/*",
+    "https://www.linkedin.com/*"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -28,8 +37,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.linkedin.com/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://www.linkedin.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "css": [],
       "run_at": "document_idle"
     }

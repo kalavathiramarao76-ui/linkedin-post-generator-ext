@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('[PostCraft AI] Uncaught error:', error, info.componentStack);
+    console.error('[Quillnova] Uncaught error:', error, info.componentStack);
   }
 
   handleRetry = () => {
@@ -46,7 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="text-center space-y-1">
               <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Something went wrong</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                PostCraft AI encountered an unexpected error.
+                Quillnova encountered an unexpected error.
               </p>
             </div>
 

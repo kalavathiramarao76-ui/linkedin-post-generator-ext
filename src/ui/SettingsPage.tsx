@@ -58,7 +58,7 @@ export const SettingsPage: React.FC = () => {
   }, []);
 
   const handleClearData = useCallback(async () => {
-    if (!confirm('Clear all PostCraft AI data? This removes favorites, settings, and onboarding state.')) return;
+    if (!confirm('Clear all Quillnova data? This removes favorites, settings, and onboarding state.')) return;
     setClearing(true);
     try {
       if (typeof chrome !== 'undefined' && chrome.storage?.local) {
@@ -197,7 +197,7 @@ export const SettingsPage: React.FC = () => {
               <span className="text-white font-bold text-xs">Li</span>
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-800 dark:text-gray-100">PostCraft AI</p>
+              <p className="text-sm font-bold text-gray-800 dark:text-gray-100">Quillnova</p>
               <p className="text-[10px] text-gray-400 dark:text-gray-500">v1.0.0</p>
             </div>
           </div>
