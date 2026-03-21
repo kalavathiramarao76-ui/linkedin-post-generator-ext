@@ -5,6 +5,7 @@ import { buildPostPrompt } from '@/shared/prompts';
 import { StyleSelector } from '@/ui/StyleSelector';
 import { LanguageSelector } from '@/ui/LanguageSelector';
 import { CharacterCounter } from '@/ui/CharacterCounter';
+import { ThemeToggle } from '@/ui/ThemeToggle';
 
 export const PopupApp: React.FC = () => {
   const [topic, setTopic] = useState('');
@@ -60,7 +61,7 @@ export const PopupApp: React.FC = () => {
   }, [handleGenerate]);
 
   return (
-    <div className="w-[380px] min-h-[500px] bg-gradient-to-br from-slate-50 via-blue-50/30 to-white">
+    <div className="w-[380px] min-h-[500px] bg-gradient-to-br from-slate-50 via-blue-50/30 to-white dark:from-slate-900 dark:via-blue-950/30 dark:to-gray-900">
       {/* Header */}
       <div className="bg-gradient-to-r from-linkedin-500 to-linkedin-600 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -74,6 +75,7 @@ export const PopupApp: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle compact />
             <LanguageSelector value={language} onChange={setLanguage} compact />
             <button
               onClick={openSidePanel}
@@ -89,7 +91,7 @@ export const PopupApp: React.FC = () => {
       <div className="p-4 space-y-3">
         {/* Topic Input */}
         <div>
-          <label className="text-xs font-semibold text-gray-600 mb-1 block">Topic</label>
+          <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1 block">Topic</label>
           <textarea
             value={topic}
             onChange={e => setTopic(e.target.value)}
@@ -102,7 +104,7 @@ export const PopupApp: React.FC = () => {
 
         {/* Style */}
         <div>
-          <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Style</label>
+          <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 block">Style</label>
           <StyleSelector value={style} onChange={setStyle} compact />
         </div>
 
@@ -128,8 +130,8 @@ export const PopupApp: React.FC = () => {
         {/* Output */}
         {output && (
           <div className="fade-in space-y-2">
-            <div className="bg-white rounded-xl border border-gray-200 p-3 max-h-52 overflow-y-auto">
-              <p className={`text-sm text-gray-800 whitespace-pre-line leading-relaxed ${loading ? 'typing-cursor' : ''}`}>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 max-h-52 overflow-y-auto">
+              <p className={`text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed ${loading ? 'typing-cursor' : ''}`}>
                 {output}
               </p>
             </div>

@@ -7,6 +7,8 @@ import { LanguageSelector } from '@/ui/LanguageSelector';
 import { ToneSelector } from '@/ui/ToneSelector';
 import { CharacterCounter } from '@/ui/CharacterCounter';
 import { LinkedInPreview } from '@/ui/LinkedInPreview';
+import { ThemeToggle } from '@/ui/ThemeToggle';
+import { OnboardingTour } from '@/ui/OnboardingTour';
 
 type Tab = 'generate' | 'hooks' | 'hashtags' | 'tone' | 'preview' | 'templates';
 
@@ -144,7 +146,8 @@ export const SidePanelApp: React.FC = () => {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-white">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-white dark:from-slate-900 dark:via-blue-950/30 dark:to-gray-900">
+      <OnboardingTour />
       {/* Header */}
       <div className="bg-gradient-to-r from-linkedin-500 to-linkedin-600 px-4 py-3 shrink-0">
         <div className="flex items-center justify-between">
@@ -157,20 +160,23 @@ export const SidePanelApp: React.FC = () => {
               <p className="text-blue-100 text-[10px]">Full Workspace</p>
             </div>
           </div>
-          <LanguageSelector value={language} onChange={setLanguage} />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LanguageSelector value={language} onChange={setLanguage} />
+          </div>
         </div>
       </div>
 
       {/* Tab Bar */}
-      <div className="flex border-b border-gray-200 bg-white shrink-0 overflow-x-auto">
+      <div className="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shrink-0 overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-1 px-3 py-2.5 text-xs font-medium whitespace-nowrap border-b-2 transition-colors ${
               activeTab === tab.id
-                ? 'border-linkedin-500 text-linkedin-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-linkedin-500 text-linkedin-600 dark:text-linkedin-300'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300'
             }`}
           >
             <span>{tab.icon}</span>
@@ -183,7 +189,7 @@ export const SidePanelApp: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Topic input - always visible */}
         <div>
-          <label className="text-xs font-semibold text-gray-600 mb-1 block">Topic</label>
+          <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1 block">Topic</label>
           <textarea
             value={topic}
             onChange={e => setTopic(e.target.value)}
@@ -196,12 +202,12 @@ export const SidePanelApp: React.FC = () => {
         {activeTab === 'generate' && (
           <div className="space-y-4 fade-in">
             <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Post Style</label>
+              <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 block">Post Style</label>
               <StyleSelector value={style} onChange={setStyle} />
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Tone</label>
+              <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 block">Tone</label>
               <ToneSelector value={tone} onChange={setTone} />
             </div>
 
@@ -271,10 +277,10 @@ export const SidePanelApp: React.FC = () => {
                 {hooks.split('\n').filter(l => l.trim()).map((hook, i) => (
                   <div
                     key={i}
-                    className="p-3 bg-white rounded-xl border border-gray-200 hover:border-linkedin-300 hover:shadow-sm transition-all cursor-pointer group"
+                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-linkedin-300 dark:hover:border-linkedin-500 hover:shadow-sm transition-all cursor-pointer group"
                     onClick={() => handleCopy(hook.replace(/^\d+\.\s*/, ''))}
                   >
-                    <p className="text-sm text-gray-800">{hook}</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-200">{hook}</p>
                     <p className="text-[10px] text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       Click to copy
                     </p>
@@ -298,7 +304,7 @@ export const SidePanelApp: React.FC = () => {
 
             {hashtags && (
               <div className="slide-up">
-                <div className="flex flex-wrap gap-2 p-4 bg-white rounded-xl border border-gray-200">
+                <div className="flex flex-wrap gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
                   {hashtags
                     .split('\n')
                     .filter(h => h.trim().startsWith('#'))
@@ -329,7 +335,7 @@ export const SidePanelApp: React.FC = () => {
             {output ? (
               <>
                 <div>
-                  <label className="text-xs font-semibold text-gray-600 mb-2 block">
+                  <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2 block">
                     Select a tone to adjust your post
                   </label>
                   <ToneSelector
@@ -338,15 +344,15 @@ export const SidePanelApp: React.FC = () => {
                   />
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-3">
-                  <p className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+                  <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">
                     {output}
                   </p>
                 </div>
                 <CharacterCounter count={output.length} />
               </>
             ) : (
-              <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-8 text-gray-400 dark:text-gray-500">
                 <p className="text-3xl mb-2">🎭</p>
                 <p className="text-sm">Generate a post first, then adjust its tone here</p>
               </div>
@@ -359,7 +365,7 @@ export const SidePanelApp: React.FC = () => {
           <div className="space-y-3 fade-in">
             {output ? (
               <>
-                <label className="text-xs font-semibold text-gray-600 block">LinkedIn Preview</label>
+                <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 block">LinkedIn Preview</label>
                 <LinkedInPreview content={output} />
                 <div className="flex gap-2">
                   <button onClick={() => handleCopy(output)} className="btn-primary flex-1 text-sm">
@@ -371,7 +377,7 @@ export const SidePanelApp: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-8 text-gray-400 dark:text-gray-500">
                 <p className="text-3xl mb-2">👁</p>
                 <p className="text-sm">Generate a post first to see the preview</p>
               </div>
@@ -382,20 +388,20 @@ export const SidePanelApp: React.FC = () => {
         {/* Templates Tab */}
         {activeTab === 'templates' && (
           <div className="space-y-3 fade-in">
-            <p className="text-xs text-gray-500">Click a template to use it as a starting point</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Click a template to use it as a starting point</p>
             {TEMPLATES.map(template => (
               <div
                 key={template.id}
-                className="p-3 bg-white rounded-xl border border-gray-200 hover:border-linkedin-300 hover:shadow-sm transition-all cursor-pointer group"
+                className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-linkedin-300 dark:hover:border-linkedin-500 hover:shadow-sm transition-all cursor-pointer group"
                 onClick={() => handleUseTemplate(template.content)}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold text-gray-800">{template.title}</h3>
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">{template.title}</h3>
                   <span className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full">
                     {template.category}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 line-clamp-2">{template.content.slice(0, 100)}...</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{template.content.slice(0, 100)}...</p>
                 <p className="text-[10px] text-linkedin-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
                   Click to use this template
                 </p>
