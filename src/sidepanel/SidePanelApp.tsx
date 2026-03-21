@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { generateStreaming } from '@/shared/api';
 import { buildPostPrompt, buildHookPrompt, buildHashtagPrompt, buildToneAdjustPrompt } from '@/shared/prompts';
 import { TEMPLATES } from '@/shared/constants';
+import { getFavorites, type FavoriteItem } from '@/shared/favorites';
 import { StyleSelector } from '@/ui/StyleSelector';
 import { LanguageSelector } from '@/ui/LanguageSelector';
 import { ToneSelector } from '@/ui/ToneSelector';
@@ -9,8 +10,10 @@ import { CharacterCounter } from '@/ui/CharacterCounter';
 import { LinkedInPreview } from '@/ui/LinkedInPreview';
 import { ThemeToggle } from '@/ui/ThemeToggle';
 import { OnboardingTour } from '@/ui/OnboardingTour';
+import { FavoriteButton } from '@/ui/FavoriteButton';
+import { CommandPalette, type PaletteCommand } from '@/ui/CommandPalette';
 
-type Tab = 'generate' | 'hooks' | 'hashtags' | 'tone' | 'preview' | 'templates';
+type Tab = 'generate' | 'hooks' | 'hashtags' | 'tone' | 'preview' | 'templates' | 'favorites';
 
 export const SidePanelApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('generate');
@@ -23,7 +26,23 @@ export const SidePanelApp: React.FC = () => {
   const [hashtags, setHashtags] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [favCount, setFavCount] = useState(0);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Load favorites count
+  useEffect(() => {
+    getFavorites().then((favs) => {
+      setFavCount(favs.length);
+      setFavorites(favs);
+    });
+  }, [activeTab]);
+
+  const refreshFavorites = useCallback(async () => {
+    const favs = await getFavorites();
+    setFavCount(favs.length);
+    setFavorites(favs);
+  }, []);
 
   const cancelGeneration = useCallback(() => {
     if (abortRef.current) abortRef.current.abort();
@@ -136,18 +155,35 @@ export const SidePanelApp: React.FC = () => {
     setActiveTab('generate');
   }, []);
 
-  const tabs: { id: Tab; label: string; icon: string }[] = [
+  const tabs: { id: Tab; label: string; icon: string; badge?: number }[] = [
     { id: 'generate', label: 'Generate', icon: '✨' },
     { id: 'hooks', label: 'Hooks', icon: '🪝' },
     { id: 'hashtags', label: 'Hashtags', icon: '#' },
     { id: 'tone', label: 'Tone', icon: '🎭' },
     { id: 'preview', label: 'Preview', icon: '👁' },
     { id: 'templates', label: 'Templates', icon: '📄' },
+    { id: 'favorites', label: 'Favorites', icon: '⭐', badge: favCount },
+  ];
+
+  const themeToggleRef = useRef<HTMLButtonElement | null>(null);
+
+  const paletteCommands: PaletteCommand[] = [
+    { id: 'generate-post', label: 'Generate Post', icon: '✨', action: () => { setActiveTab('generate'); } },
+    { id: 'generate-hooks', label: 'Generate Hooks', icon: '🪝', action: () => { setActiveTab('hooks'); } },
+    { id: 'suggest-hashtags', label: 'Suggest Hashtags', icon: '#', action: () => { setActiveTab('hashtags'); } },
+    { id: 'adjust-tone', label: 'Adjust Tone', icon: '🎭', action: () => { setActiveTab('tone'); } },
+    { id: 'view-templates', label: 'View Templates', icon: '📄', action: () => { setActiveTab('templates'); } },
+    { id: 'view-favorites', label: 'View Favorites', icon: '⭐', action: () => { setActiveTab('favorites'); } },
+    { id: 'toggle-theme', label: 'Toggle Theme', icon: '🌓', action: () => { themeToggleRef.current?.click(); } },
+    { id: 'settings', label: 'Settings', icon: '⚙️', action: () => { /* future settings panel */ } },
+    { id: 'linkedin-preview', label: 'LinkedIn Preview', icon: '👁', action: () => { setActiveTab('preview'); } },
+    { id: 'help', label: 'Help', icon: '❓', shortcut: '?', action: () => { window.open('https://github.com/kalavathiramarao76-ui/linkedin-post-generator-ext', '_blank'); } },
   ];
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-white dark:from-slate-900 dark:via-blue-950/30 dark:to-gray-900">
       <OnboardingTour />
+      <CommandPalette commands={paletteCommands} />
       {/* Header */}
       <div className="bg-gradient-to-r from-linkedin-500 to-linkedin-600 px-4 py-3 shrink-0">
         <div className="flex items-center justify-between">
@@ -161,6 +197,16 @@ export const SidePanelApp: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              className="text-white/60 hover:text-white/90 text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded-lg transition-colors font-mono"
+              onClick={() => {
+                const ev = new KeyboardEvent('keydown', { key: 'K', shiftKey: true, ctrlKey: true, bubbles: true });
+                window.dispatchEvent(ev);
+              }}
+              title="Command Palette (Ctrl+Shift+K)"
+            >
+              Ctrl+Shift+K
+            </button>
             <ThemeToggle />
             <LanguageSelector value={language} onChange={setLanguage} />
           </div>
@@ -181,6 +227,11 @@ export const SidePanelApp: React.FC = () => {
           >
             <span>{tab.icon}</span>
             {tab.label}
+            {tab.badge != null && tab.badge > 0 && (
+              <span className="ml-0.5 px-1.5 py-0.5 text-[9px] font-bold bg-amber-400 text-white rounded-full leading-none">
+                {tab.badge}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -234,7 +285,9 @@ export const SidePanelApp: React.FC = () => {
               <div className="space-y-2 slide-up">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-gray-600">Generated Post</label>
-                  <div className="flex gap-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <FavoriteButton type="post" content={output} topic={topic} onToggle={() => refreshFavorites()} size="sm" />
+                    <span className="text-gray-300">|</span>
                     <button
                       onClick={() => handleCopy(output)}
                       className="text-xs text-linkedin-500 hover:text-linkedin-600 font-medium"
@@ -280,7 +333,10 @@ export const SidePanelApp: React.FC = () => {
                     className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-linkedin-300 dark:hover:border-linkedin-500 hover:shadow-sm transition-all cursor-pointer group"
                     onClick={() => handleCopy(hook.replace(/^\d+\.\s*/, ''))}
                   >
-                    <p className="text-sm text-gray-800 dark:text-gray-200">{hook}</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm text-gray-800 dark:text-gray-200 flex-1">{hook}</p>
+                      <FavoriteButton type="hook" content={hook.replace(/^\d+\.\s*/, '')} topic={topic} onToggle={() => refreshFavorites()} size="sm" />
+                    </div>
                     <p className="text-[10px] text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       Click to copy
                     </p>
@@ -309,13 +365,15 @@ export const SidePanelApp: React.FC = () => {
                     .split('\n')
                     .filter(h => h.trim().startsWith('#'))
                     .map((tag, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleCopy(tag.trim())}
-                        className="px-3 py-1.5 bg-linkedin-50 text-linkedin-600 rounded-full text-sm font-medium hover:bg-linkedin-100 transition-colors"
-                      >
-                        {tag.trim()}
-                      </button>
+                      <div key={i} className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleCopy(tag.trim())}
+                          className="px-3 py-1.5 bg-linkedin-50 text-linkedin-600 rounded-full text-sm font-medium hover:bg-linkedin-100 transition-colors"
+                        >
+                          {tag.trim()}
+                        </button>
+                        <FavoriteButton type="hashtag" content={tag.trim()} topic={topic} onToggle={() => refreshFavorites()} size="sm" />
+                      </div>
                     ))}
                 </div>
                 <button
@@ -407,6 +465,63 @@ export const SidePanelApp: React.FC = () => {
                 </p>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Favorites Tab */}
+        {activeTab === 'favorites' && (
+          <div className="space-y-3 fade-in">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {favorites.length} saved item{favorites.length !== 1 ? 's' : ''} (max 50)
+              </p>
+            </div>
+            {favorites.length === 0 ? (
+              <div className="text-center py-8 text-gray-400 dark:text-gray-500">
+                <p className="text-3xl mb-2">⭐</p>
+                <p className="text-sm">No favorites yet</p>
+                <p className="text-xs mt-1">Star posts, hooks, or hashtags to save them here</p>
+              </div>
+            ) : (
+              favorites.map((fav) => (
+                <div
+                  key={fav.id}
+                  className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-sm transition-all group"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          fav.type === 'post' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300' :
+                          fav.type === 'hook' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300' :
+                          'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-300'
+                        }`}>
+                          {fav.type}
+                        </span>
+                        {fav.topic && (
+                          <span className="text-[10px] text-gray-400 truncate">{fav.topic}</span>
+                        )}
+                        <span className="text-[10px] text-gray-300 dark:text-gray-600 ml-auto shrink-0">
+                          {new Date(fav.timestamp).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-3 whitespace-pre-line">
+                        {fav.content}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => handleCopy(fav.content)}
+                        className="text-[10px] text-gray-400 hover:text-linkedin-500 transition-colors"
+                      >
+                        Copy
+                      </button>
+                      <FavoriteButton type={fav.type} content={fav.content} onToggle={() => refreshFavorites()} size="sm" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
       </div>

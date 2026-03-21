@@ -6,6 +6,8 @@ import { StyleSelector } from '@/ui/StyleSelector';
 import { LanguageSelector } from '@/ui/LanguageSelector';
 import { CharacterCounter } from '@/ui/CharacterCounter';
 import { ThemeToggle } from '@/ui/ThemeToggle';
+import { FavoriteButton } from '@/ui/FavoriteButton';
+import { CommandPalette, type PaletteCommand } from '@/ui/CommandPalette';
 
 export const PopupApp: React.FC = () => {
   const [topic, setTopic] = useState('');
@@ -60,8 +62,16 @@ export const PopupApp: React.FC = () => {
     }
   }, [handleGenerate]);
 
+  const popupCommands: PaletteCommand[] = [
+    { id: 'generate-post', label: 'Generate Post', icon: '✨', action: () => handleGenerate() },
+    { id: 'open-sidepanel', label: 'Open Full Editor', icon: '🖥', action: () => openSidePanel() },
+    { id: 'toggle-theme', label: 'Toggle Theme', icon: '🌓', action: () => { /* theme toggle via ref */ } },
+    { id: 'help', label: 'Help', icon: '❓', action: () => window.open('https://github.com/kalavathiramarao76-ui/linkedin-post-generator-ext', '_blank') },
+  ];
+
   return (
     <div className="w-[380px] min-h-[500px] bg-gradient-to-br from-slate-50 via-blue-50/30 to-white dark:from-slate-900 dark:via-blue-950/30 dark:to-gray-900">
+      <CommandPalette commands={popupCommands} />
       {/* Header */}
       <div className="bg-gradient-to-r from-linkedin-500 to-linkedin-600 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -136,7 +146,8 @@ export const PopupApp: React.FC = () => {
               </p>
             </div>
             <CharacterCounter count={output.length} />
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <FavoriteButton type="post" content={output} topic={topic} size="sm" />
               <button onClick={handleCopy} className="btn-secondary flex-1 text-xs flex items-center justify-center gap-1">
                 {copied ? 'Copied!' : 'Copy'}
               </button>
