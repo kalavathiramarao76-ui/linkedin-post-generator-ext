@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "LinkedIn Post Generator",
-  "description": "AI-powered LinkedIn post generation with 6 styles, hooks, hashtags, tone adjustment, and multi-language support",
+  "name": "PostCraft AI — LinkedIn Post Generator & Writer",
+  "short_name": "PostCraft AI",
+  "description": "AI LinkedIn post generator: create viral posts in seconds. Free Chrome extension with 6 styles, hooks & hashtags.",
   "version": "1.0.0",
   "icons": {
     "16": "icons/icon-16.png",

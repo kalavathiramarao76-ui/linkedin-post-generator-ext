@@ -156,7 +156,7 @@ export const SidePanelApp: React.FC = () => {
               <span className="text-white font-bold text-sm">Li</span>
             </div>
             <div>
-              <h1 className="text-white font-bold text-sm">Post Generator</h1>
+              <h1 className="text-white font-bold text-sm">PostCraft AI</h1>
               <p className="text-blue-100 text-[10px]">Full Workspace</p>
             </div>
           </div>
