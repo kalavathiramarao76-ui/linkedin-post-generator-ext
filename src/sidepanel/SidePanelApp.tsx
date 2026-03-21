@@ -12,8 +12,10 @@ import { ThemeToggle } from '@/ui/ThemeToggle';
 import { OnboardingTour } from '@/ui/OnboardingTour';
 import { FavoriteButton } from '@/ui/FavoriteButton';
 import { CommandPalette, type PaletteCommand } from '@/ui/CommandPalette';
+import { ApiErrorFallback } from '@/ui/ApiErrorFallback';
+import { SettingsPage, loadSettings } from '@/ui/SettingsPage';
 
-type Tab = 'generate' | 'hooks' | 'hashtags' | 'tone' | 'preview' | 'templates' | 'favorites';
+type Tab = 'generate' | 'hooks' | 'hashtags' | 'tone' | 'preview' | 'templates' | 'favorites' | 'settings';
 
 export const SidePanelApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('generate');
@@ -28,7 +30,15 @@ export const SidePanelApp: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [favCount, setFavCount] = useState(0);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+  const [apiError, setApiError] = useState<{ message: string; retryFn: () => void } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Load settings (default language)
+  useEffect(() => {
+    loadSettings().then((s) => {
+      if (s.defaultLanguage) setLanguage(s.defaultLanguage);
+    });
+  }, []);
 
   // Load favorites count
   useEffect(() => {
@@ -53,6 +63,7 @@ export const SidePanelApp: React.FC = () => {
     if (!topic.trim() || loading) return;
     setLoading(true);
     setOutput('');
+    setApiError(null);
     setActiveTab('generate');
 
     abortRef.current = new AbortController();
@@ -66,7 +77,7 @@ export const SidePanelApp: React.FC = () => {
       });
     } catch (err: unknown) {
       if ((err as Error).name !== 'AbortError') {
-        setOutput(`Error: ${(err as Error).message}`);
+        setApiError({ message: (err as Error).message, retryFn: () => handleGenerate() });
       }
     } finally {
       setLoading(false);
@@ -77,6 +88,7 @@ export const SidePanelApp: React.FC = () => {
     if (!topic.trim() || loading) return;
     setLoading(true);
     setHooks('');
+    setApiError(null);
     setActiveTab('hooks');
 
     abortRef.current = new AbortController();
@@ -90,7 +102,7 @@ export const SidePanelApp: React.FC = () => {
       });
     } catch (err: unknown) {
       if ((err as Error).name !== 'AbortError') {
-        setHooks(`Error: ${(err as Error).message}`);
+        setApiError({ message: (err as Error).message, retryFn: () => handleGenerateHooks() });
       }
     } finally {
       setLoading(false);
@@ -101,6 +113,7 @@ export const SidePanelApp: React.FC = () => {
     if (!topic.trim() || loading) return;
     setLoading(true);
     setHashtags('');
+    setApiError(null);
     setActiveTab('hashtags');
 
     abortRef.current = new AbortController();
@@ -114,7 +127,7 @@ export const SidePanelApp: React.FC = () => {
       });
     } catch (err: unknown) {
       if ((err as Error).name !== 'AbortError') {
-        setHashtags(`Error: ${(err as Error).message}`);
+        setApiError({ message: (err as Error).message, retryFn: () => handleGenerateHashtags() });
       }
     } finally {
       setLoading(false);
@@ -125,6 +138,7 @@ export const SidePanelApp: React.FC = () => {
     if (!output.trim() || loading) return;
     setTone(newTone);
     setLoading(true);
+    setApiError(null);
 
     abortRef.current = new AbortController();
     const messages = buildToneAdjustPrompt(output, newTone, language);
@@ -137,7 +151,7 @@ export const SidePanelApp: React.FC = () => {
       });
     } catch (err: unknown) {
       if ((err as Error).name !== 'AbortError') {
-        setOutput(`Error: ${(err as Error).message}`);
+        setApiError({ message: (err as Error).message, retryFn: () => handleAdjustTone(newTone) });
       }
     } finally {
       setLoading(false);
@@ -163,6 +177,7 @@ export const SidePanelApp: React.FC = () => {
     { id: 'preview', label: 'Preview', icon: '👁' },
     { id: 'templates', label: 'Templates', icon: '📄' },
     { id: 'favorites', label: 'Favorites', icon: '⭐', badge: favCount },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
   const themeToggleRef = useRef<HTMLButtonElement | null>(null);
@@ -175,7 +190,7 @@ export const SidePanelApp: React.FC = () => {
     { id: 'view-templates', label: 'View Templates', icon: '📄', action: () => { setActiveTab('templates'); } },
     { id: 'view-favorites', label: 'View Favorites', icon: '⭐', action: () => { setActiveTab('favorites'); } },
     { id: 'toggle-theme', label: 'Toggle Theme', icon: '🌓', action: () => { themeToggleRef.current?.click(); } },
-    { id: 'settings', label: 'Settings', icon: '⚙️', action: () => { /* future settings panel */ } },
+    { id: 'settings', label: 'Settings', icon: '⚙️', action: () => { setActiveTab('settings'); } },
     { id: 'linkedin-preview', label: 'LinkedIn Preview', icon: '👁', action: () => { setActiveTab('preview'); } },
     { id: 'help', label: 'Help', icon: '❓', shortcut: '?', action: () => { window.open('https://github.com/kalavathiramarao76-ui/linkedin-post-generator-ext', '_blank'); } },
   ];
@@ -238,6 +253,14 @@ export const SidePanelApp: React.FC = () => {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* API Error Fallback */}
+        {apiError && (
+          <ApiErrorFallback
+            error={apiError.message}
+            onRetry={() => { setApiError(null); apiError.retryFn(); }}
+          />
+        )}
+
         {/* Topic input - always visible */}
         <div>
           <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1 block">Topic</label>
@@ -524,6 +547,9 @@ export const SidePanelApp: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Settings Tab */}
+        {activeTab === 'settings' && <SettingsPage />}
       </div>
     </div>
   );

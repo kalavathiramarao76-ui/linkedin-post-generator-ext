@@ -1,4 +1,4 @@
-import { API_URL, MODEL } from './constants';
+import { API_URL, MODEL, DEFAULT_API_URL, DEFAULT_MODEL } from './constants';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -11,12 +11,29 @@ export interface GenerateOptions {
   signal?: AbortSignal;
 }
 
+async function getApiConfig(): Promise<{ url: string; model: string }> {
+  try {
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      return new Promise((resolve) => {
+        chrome.storage.local.get('li-post-gen-settings', (result) => {
+          const s = result['li-post-gen-settings'] as { apiEndpoint?: string; model?: string } | undefined;
+          const base = s?.apiEndpoint || DEFAULT_API_URL;
+          const endpoint = base.endsWith('/') ? `${base}v1/chat/completions` : `${base}/v1/chat/completions`;
+          resolve({ url: endpoint, model: s?.model || DEFAULT_MODEL });
+        });
+      });
+    }
+  } catch (_) {}
+  return { url: API_URL, model: MODEL };
+}
+
 export async function generateStreaming({ messages, onChunk, signal }: GenerateOptions): Promise<string> {
-  const response = await fetch(API_URL, {
+  const config = await getApiConfig();
+  const response = await fetch(config.url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: MODEL,
+      model: config.model,
       messages,
       stream: true,
       temperature: 0.8,
@@ -67,11 +84,12 @@ export async function generateStreaming({ messages, onChunk, signal }: GenerateO
 }
 
 export async function generateNonStreaming(messages: ChatMessage[]): Promise<string> {
-  const response = await fetch(API_URL, {
+  const config = await getApiConfig();
+  const response = await fetch(config.url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: MODEL,
+      model: config.model,
       messages,
       stream: false,
       temperature: 0.8,

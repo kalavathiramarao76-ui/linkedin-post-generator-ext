@@ -1,5 +1,21 @@
-export const API_URL = 'https://sai.sharedllm.com/v1/chat/completions';
-export const MODEL = 'gpt-oss:120b';
+export const DEFAULT_API_URL = 'https://sai.sharedllm.com';
+export const DEFAULT_MODEL = 'gpt-oss:120b';
+
+// Legacy exports — used by api.ts as runtime defaults
+export const API_URL = `${DEFAULT_API_URL}/v1/chat/completions`;
+export const MODEL = DEFAULT_MODEL;
+
+export interface ModelOption {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export const MODELS: ModelOption[] = [
+  { id: 'gpt-oss:120b', label: 'GPT-OSS 120B', description: 'Best quality — large model, slower' },
+  { id: 'gpt-oss:20b', label: 'GPT-OSS 20B', description: 'Balanced — good quality, faster' },
+  { id: 'qwen2.5:3b', label: 'Qwen 2.5 3B', description: 'Fastest — lightweight, instant responses' },
+];
 
 export interface PostStyle {
   id: string;

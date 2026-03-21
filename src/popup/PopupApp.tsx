@@ -8,6 +8,8 @@ import { CharacterCounter } from '@/ui/CharacterCounter';
 import { ThemeToggle } from '@/ui/ThemeToggle';
 import { FavoriteButton } from '@/ui/FavoriteButton';
 import { CommandPalette, type PaletteCommand } from '@/ui/CommandPalette';
+import { ApiErrorFallback } from '@/ui/ApiErrorFallback';
+import { loadSettings } from '@/ui/SettingsPage';
 
 export const PopupApp: React.FC = () => {
   const [topic, setTopic] = useState('');
@@ -16,7 +18,15 @@ export const PopupApp: React.FC = () => {
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [apiError, setApiError] = useState<{ message: string; retryFn: () => void } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Load default language from settings
+  useEffect(() => {
+    loadSettings().then((s) => {
+      if (s.defaultLanguage) setLanguage(s.defaultLanguage);
+    });
+  }, []);
 
   const handleGenerate = useCallback(async () => {
     if (!topic.trim() || loading) return;
@@ -34,7 +44,7 @@ export const PopupApp: React.FC = () => {
       });
     } catch (err: unknown) {
       if ((err as Error).name !== 'AbortError') {
-        setOutput(`Error: ${(err as Error).message}`);
+        setApiError({ message: (err as Error).message, retryFn: () => handleGenerate() });
       }
     } finally {
       setLoading(false);
@@ -99,6 +109,14 @@ export const PopupApp: React.FC = () => {
       </div>
 
       <div className="p-4 space-y-3">
+        {/* API Error Fallback */}
+        {apiError && (
+          <ApiErrorFallback
+            error={apiError.message}
+            onRetry={() => { setApiError(null); apiError.retryFn(); }}
+          />
+        )}
+
         {/* Topic Input */}
         <div>
           <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1 block">Topic</label>
