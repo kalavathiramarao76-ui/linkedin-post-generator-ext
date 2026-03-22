@@ -1,4 +1,5 @@
 import { API_URL, MODEL, DEFAULT_API_URL, DEFAULT_MODEL } from './constants';
+import { incrementUsage } from './usage';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -28,6 +29,7 @@ async function getApiConfig(): Promise<{ url: string; model: string }> {
 }
 
 export async function generateStreaming({ messages, onChunk, signal }: GenerateOptions): Promise<string> {
+  incrementUsage();
   const config = await getApiConfig();
   const response = await fetch(config.url, {
     method: 'POST',
