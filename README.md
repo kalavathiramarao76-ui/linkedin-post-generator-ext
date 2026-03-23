@@ -1,3 +1,5 @@
+<p align="center"><img src="src/assets/icons/logo.svg" width="128" height="128" alt="Quillnova Logo"></p>
+
 # Quillnova — AI-Powered LinkedIn Post Generator
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
@@ -128,11 +130,12 @@ linkedin-post-generator-ext/
 ## Screenshots
 
 <p align="center">
-  <img src="src/assets/icons/icon-128.png" alt="Quillnova Icon" width="128" height="128" />
+  <img src="src/assets/icons/logo.svg" alt="Quillnova Logo" width="128" height="128" />
 </p>
 
-| Icon Size | Path |
+| Icon | Path |
 |---|---|
+| SVG Logo | `src/assets/icons/logo.svg` |
 | 16x16 | `src/assets/icons/icon-16.png` |
 | 48x48 | `src/assets/icons/icon-48.png` |
 | 128x128 | `src/assets/icons/icon-128.png` |
